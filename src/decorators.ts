@@ -11,7 +11,6 @@ export const DESIGN_RETURN_TYPE = 'design:returntype';
 interface IOperationObject extends Partial<OperationObject> {
     paramTypes?: any[];
     returnType?: any;
-    paramStringify?: boolean;
 }
 export type OpenAPIParam = | Partial<OperationObject> | ((source: OperationObject, route: IRoute) => OperationObject)
 

@@ -6,7 +6,6 @@ export declare const DESIGN_RETURN_TYPE = "design:returntype";
 interface IOperationObject extends Partial<OperationObject> {
     paramTypes?: any[];
     returnType?: any;
-    paramStringify?: boolean;
 }
 export declare type OpenAPIParam = Partial<OperationObject> | ((source: OperationObject, route: IRoute) => OperationObject);
 export declare function ParamTypes(types: any[]): (target: object, key: string, descriptor: PropertyDescriptor) => void;
