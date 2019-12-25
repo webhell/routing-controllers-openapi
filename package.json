@@ -1,0 +1,39 @@
+{
+  "name": "@webhell/routing-controllers-openapi",
+  "version": "0.0.1",
+  "license": "MIT",
+  "repository": "git@https://github.com/webhell/routing-controllers-openapi.git",
+  "author": "sai <hoosai@163.com>",
+  "main": "build/index.js",
+  "typings": "build/index.d.ts",
+  "scripts": {
+    "dev": "tsc --watch",
+    "start": "tsc --watch",
+    "build": "npm run clean && npm run compile",
+    "clean": "gts clean",
+    "compile": "tsc -p .",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "glob": "^7.1.6",
+    "lodash": "^4.17.15",
+    "openapi3-ts": "^1.3.0",
+    "path": "^0.12.7",
+    "path-to-regexp": "^6.1.0",
+    "reflect-metadata": "^0.1.13",
+    "routing-controllers": "^0.8.0",
+    "typescript-json-schema": "^0.41.0"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/lodash": "^4.14.149",
+    "@types/node": "^12.12.14",
+    "@types/reflect-metadata": "^0.1.0",
+    "class-transformer": "^0.2.3",
+    "class-validator": "^0.11.0",
+    "gts": "^1.1.2",
+    "ts-node": "^8.5.2",
+    "typescript": "^3.7.2"
+  }
+}
