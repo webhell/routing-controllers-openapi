@@ -1,7 +1,8 @@
 import * as _ from 'lodash';
 import 'reflect-metadata';
-import { OperationObject } from 'openapi3-ts';
+import { OperationObject, SchemaObject } from 'openapi3-ts';
 import { IRoute } from './compile';
+import { getContentType, getStatusCode } from './generate';
 
 const OPEN_API_KEY = Symbol('routing-controllers-openapi:OpenAPI');
 export const DESIGN_PARAM_TYPES = 'design:paramtypes';
@@ -106,4 +107,20 @@ function setOpenAPIMetadata(value: OpenAPIParam[], target: object, key?: string)
     return key
         ? Reflect.defineMetadata(OPEN_API_KEY, value, target.constructor, key)
         : Reflect.defineMetadata(OPEN_API_KEY, value, target);
+}
+/**
+ * Supplement action with response body type annotation.
+ */
+export function TransRespons(transFun: (schema: SchemaObject, source: OperationObject, route: IRoute) => SchemaObject) {
+    const setResponse = (source: OperationObject, route: IRoute) => {
+        const statusCode = getStatusCode(route);
+        const contentType = getContentType(route);
+        const schemaKey = ['response', statusCode, 'content', contentType, 'schema'].join('.');
+        const schema: SchemaObject = _.get(source, schemaKey);
+        if (schema !== undefined) {
+            _.set(source, schemaKey, transFun(schema, source, route));
+        }
+        return source;
+    };
+    return OpenAPI(setResponse);
 }

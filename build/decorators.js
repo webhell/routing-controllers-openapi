@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
 require("reflect-metadata");
+const generate_1 = require("./generate");
 const OPEN_API_KEY = Symbol('routing-controllers-openapi:OpenAPI');
 exports.DESIGN_PARAM_TYPES = 'design:paramtypes';
 exports.DESIGN_RETURN_TYPE = 'design:returntype';
@@ -94,3 +95,20 @@ function setOpenAPIMetadata(value, target, key) {
         ? Reflect.defineMetadata(OPEN_API_KEY, value, target.constructor, key)
         : Reflect.defineMetadata(OPEN_API_KEY, value, target);
 }
+/**
+ * Supplement action with response body type annotation.
+ */
+function TransRespons(transFun) {
+    const setResponse = (source, route) => {
+        const statusCode = generate_1.getStatusCode(route);
+        const contentType = generate_1.getContentType(route);
+        const schemaKey = ['response', statusCode, 'content', contentType, 'schema'].join('.');
+        const schema = _.get(source, schemaKey);
+        if (schema !== undefined) {
+            _.set(source, schemaKey, transFun(schema, source, route));
+        }
+        return source;
+    };
+    return OpenAPI(setResponse);
+}
+exports.TransRespons = TransRespons;

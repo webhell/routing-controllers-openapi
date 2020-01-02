@@ -10,7 +10,7 @@ import { ParamMetadataArgs } from 'routing-controllers/metadata/args/ParamMetada
 import { ActionMetadataArgs } from "routing-controllers/metadata/args/ActionMetadataArgs";
 import { ControllerMetadataArgs } from "routing-controllers/metadata/args/ControllerMetadataArgs";
 import { ResponseHandlerMetadataArgs } from "routing-controllers/metadata/args/ResponseHandleMetadataArgs";
-import { DESIGN_PARAM_TYPES, DESIGN_RETURN_TYPE } from './decorators';
+import { DESIGN_PARAM_TYPES, DESIGN_RETURN_TYPE, TransRespons } from './decorators';
 
 export interface ICompilerOptions {
     /**
@@ -28,7 +28,11 @@ export interface ICompilerOptions {
     /**
      * 默认'#/components/schemas/'
      */
-    refPointerPrefix?: string
+    refPointerPrefix?: string;
+    /**
+     * 批量修改响应 response schema
+     */
+    transResponseFun?: (schema: SchemaObject, source: OperationObject, route: IRoute) => SchemaObject;
 }
 type ISchemas = { [schema: string]: SchemaObject | ReferenceObject }
 
@@ -43,15 +47,23 @@ export interface IRoute {
 /**将routing-controllers元数据解析为IRoute对象数组 */
 export function parseRoutes(
     storage: MetadataArgsStorage,
-    options: RoutingControllersOptions = {}
+    options: RoutingControllersOptions = {},
+    compilerOptions: ICompilerOptions = {}
 ): IRoute[] {
-    return storage.actions.map(action => ({
+    const routes = storage.actions.map(action => ({
         action,
         controller: _.find(storage.controllers, { target: action.target }) as ControllerMetadataArgs,
         options,
         params: _.sortBy(storage.filterParamsWithTargetAndMethod(action.target, action.method), 'index'),
         responseHandlers: storage.filterResponseHandlersWithTargetAndMethod(action.target, action.method)
     }));
+    const { transResponseFun } = compilerOptions;
+    if (transResponseFun) {
+        storage.controllers.map(controller => {
+            TransRespons(transResponseFun).apply(null, [controller.target]);
+        });
+    }
+    return routes;
 }
 
 export function getSchemaByType(type: any, param?: ParamMetadataArgs): SchemaObject | ReferenceObject {
@@ -209,44 +221,6 @@ export function transParameters(spec: OpenAPIObject, generator: JsonSchemaGenera
                 return cache;
             }, {});
             operation.parameters = _(cache).values().map(r => _.uniqBy([...r[0], ...r[1]], 'name')).flatten().value();
-        });
-    });
-    return spec;
-}
-
-/**
- * 
- */
-export function transResponse(spec: OpenAPIObject, compilerOptions: ICompilerOptions): OpenAPIObject {
-    Object.keys(spec.paths).forEach(path => {
-        Object.keys(spec.paths[path]).forEach(method => {
-            const operation = spec.paths[path][method] as OperationObject;
-            const { responses } = operation;
-            if (!responses) return;
-            Object.keys(responses).forEach(status => {
-                Object.keys(responses[status]['content']).forEach(contentType => {
-                    let content: SchemaObject = responses[status]['content'][contentType];
-                    content = {
-                        type: 'object',
-                        properties: {
-                            retCode: {
-                                type: 'number',
-                                description: '0正常返回'
-                            },
-                            retMsg: {
-                                type: 'string',
-                                description: '错误消息'
-                            },
-                            data: { ...content }
-                        },
-                        required: [
-                            'retCode',
-                            'retMsg',
-                            'data'
-                        ]
-                    };
-                });
-            });
         });
     });
     return spec;

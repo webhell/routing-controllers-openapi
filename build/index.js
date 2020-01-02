@@ -14,10 +14,9 @@ __export(require("./generate"));
 function routingControllersToSpec(storage = routing_controllers_1.getMetadataArgsStorage(), compilerOptions = {}, routingControllerOptions = {}, additionalProperties = {}) {
     const generator = compile_1.getGenerator(compilerOptions);
     const schemas = compile_1.generatorToSchemasByStorage(generator, storage, compilerOptions);
-    const routes = compile_1.parseRoutes(storage, routingControllerOptions);
+    const routes = compile_1.parseRoutes(storage, routingControllerOptions, compilerOptions);
     const spec = generate_1.getSpec(routes);
-    let transSpec = compile_1.transParameters(spec, generator);
-    transSpec = compile_1.transResponse(spec, compilerOptions);
+    const transSpec = compile_1.transParameters(spec, generator);
     return _.merge(transSpec, { components: { schemas } }, additionalProperties);
 }
 exports.routingControllersToSpec = routingControllersToSpec;

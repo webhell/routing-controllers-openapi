@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { SchemaObject, ReferenceObject, OpenAPIObject } from 'openapi3-ts';
+import { SchemaObject, ReferenceObject, OpenAPIObject, OperationObject } from 'openapi3-ts';
 import { JsonSchemaGenerator } from 'typescript-json-schema';
 import { MetadataArgsStorage, RoutingControllersOptions } from 'routing-controllers';
 import { ParamMetadataArgs } from 'routing-controllers/metadata/args/ParamMetadataArgs';
@@ -25,6 +25,10 @@ export interface ICompilerOptions {
      * 默认'#/components/schemas/'
      */
     refPointerPrefix?: string;
+    /**
+     * 批量修改响应 response schema
+     */
+    transResponseFun?: (schema: SchemaObject, source: OperationObject, route: IRoute) => SchemaObject;
 }
 declare type ISchemas = {
     [schema: string]: SchemaObject | ReferenceObject;
@@ -37,7 +41,7 @@ export interface IRoute {
     readonly responseHandlers: ResponseHandlerMetadataArgs[];
 }
 /**将routing-controllers元数据解析为IRoute对象数组 */
-export declare function parseRoutes(storage: MetadataArgsStorage, options?: RoutingControllersOptions): IRoute[];
+export declare function parseRoutes(storage: MetadataArgsStorage, options?: RoutingControllersOptions, compilerOptions?: ICompilerOptions): IRoute[];
 export declare function getSchemaByType(type: any, param?: ParamMetadataArgs): SchemaObject | ReferenceObject;
 /**获取ts运行时类型数据 */
 export declare function getGenerator(compilerOptions: ICompilerOptions): JsonSchemaGenerator | null;
@@ -47,8 +51,4 @@ export declare function generatorToSchemasByStorage(generator: JsonSchemaGenerat
  * 展开下parameters schema参数
  */
 export declare function transParameters(spec: OpenAPIObject, generator: JsonSchemaGenerator | null): OpenAPIObject;
-/**
- *
- */
-export declare function transResponse(spec: OpenAPIObject, compilerOptions: ICompilerOptions): OpenAPIObject;
 export {};

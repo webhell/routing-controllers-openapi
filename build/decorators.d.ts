@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { OperationObject } from 'openapi3-ts';
+import { OperationObject, SchemaObject } from 'openapi3-ts';
 import { IRoute } from './compile';
 export declare const DESIGN_PARAM_TYPES = "design:paramtypes";
 export declare const DESIGN_RETURN_TYPE = "design:returntype";
@@ -24,4 +24,8 @@ export declare function OpenAPI(spec: IOperationObject | OpenAPIParam): (...args
  * Apply the keywords defined in @OpenAPI decorator to its target route.
  */
 export declare function applyOpenAPIDecorator(originalOperation: OperationObject, route: IRoute): OperationObject;
+/**
+ * Supplement action with response body type annotation.
+ */
+export declare function TransRespons(transFun: (schema: SchemaObject, source: OperationObject, route: IRoute) => SchemaObject): (...args: [Function] | [object, string, PropertyDescriptor]) => void;
 export {};

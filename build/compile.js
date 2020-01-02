@@ -8,14 +8,21 @@ require("reflect-metadata");
 const typescript_json_schema_1 = require("typescript-json-schema");
 const decorators_1 = require("./decorators");
 /**将routing-controllers元数据解析为IRoute对象数组 */
-function parseRoutes(storage, options = {}) {
-    return storage.actions.map(action => ({
+function parseRoutes(storage, options = {}, compilerOptions = {}) {
+    const routes = storage.actions.map(action => ({
         action,
         controller: _.find(storage.controllers, { target: action.target }),
         options,
         params: _.sortBy(storage.filterParamsWithTargetAndMethod(action.target, action.method), 'index'),
         responseHandlers: storage.filterResponseHandlersWithTargetAndMethod(action.target, action.method)
     }));
+    const { transResponseFun } = compilerOptions;
+    if (transResponseFun) {
+        storage.controllers.map(controller => {
+            decorators_1.TransRespons(transResponseFun).apply(null, [controller.target]);
+        });
+    }
+    return routes;
 }
 exports.parseRoutes = parseRoutes;
 function getSchemaByType(type, param) {
@@ -181,42 +188,3 @@ function transParameters(spec, generator) {
     return spec;
 }
 exports.transParameters = transParameters;
-/**
- *
- */
-function transResponse(spec, compilerOptions) {
-    Object.keys(spec.paths).forEach(path => {
-        Object.keys(spec.paths[path]).forEach(method => {
-            const operation = spec.paths[path][method];
-            const { responses } = operation;
-            if (!responses)
-                return;
-            Object.keys(responses).forEach(status => {
-                Object.keys(responses[status]['content']).forEach(contentType => {
-                    let content = responses[status]['content'][contentType];
-                    content = {
-                        type: 'object',
-                        properties: {
-                            retCode: {
-                                type: 'number',
-                                description: '0正常返回'
-                            },
-                            retMsg: {
-                                type: 'string',
-                                description: '错误消息'
-                            },
-                            data: Object.assign({}, content)
-                        },
-                        required: [
-                            'retCode',
-                            'retMsg',
-                            'data'
-                        ]
-                    };
-                });
-            });
-        });
-    });
-    return spec;
-}
-exports.transResponse = transResponse;

@@ -4,6 +4,15 @@ import { getMetadataArgsStorage } from "routing-controllers";
 const spec = routingControllersToSpec(getMetadataArgsStorage(), {
     pattern: 'src/controller/**/*.ts',
     tsCompilerOptions: { strictNullChecks: false, skipLibCheck: true },
-    refPointerPrefix: '#/components/schemas/'
+    refPointerPrefix: '#/components/schemas/',
+    transResponseFun: (schema: SchemaObject, source: OperationObject, route: IRoute): SchemaObject => ({
+        type: 'object',
+        properties: {
+        retCode: { type: 'number', description: '0正常' },
+        retMsg: { type: 'string', description: 'message' },
+        data: { schema }
+        },
+        required: ['retCode', 'retMsg', 'data']
+    })
 });
 ```
