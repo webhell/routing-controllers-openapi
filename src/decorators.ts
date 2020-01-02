@@ -115,7 +115,7 @@ export function TransRespons(transFun: (schema: SchemaObject, source: OperationO
     const setResponse = (source: OperationObject, route: IRoute) => {
         const statusCode = getStatusCode(route);
         const contentType = getContentType(route);
-        const schemaKey = ['response', statusCode, 'content', contentType, 'schema'].join('.');
+        const schemaKey = ['responses', statusCode, 'content', contentType, 'schema'].join('.');
         const schema: SchemaObject = _.get(source, schemaKey);
         if (schema !== undefined) {
             _.set(source, schemaKey, transFun(schema, source, route));

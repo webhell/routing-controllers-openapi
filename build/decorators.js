@@ -102,7 +102,7 @@ function TransRespons(transFun) {
     const setResponse = (source, route) => {
         const statusCode = generate_1.getStatusCode(route);
         const contentType = generate_1.getContentType(route);
-        const schemaKey = ['response', statusCode, 'content', contentType, 'schema'].join('.');
+        const schemaKey = ['responses', statusCode, 'content', contentType, 'schema'].join('.');
         const schema = _.get(source, schemaKey);
         if (schema !== undefined) {
             _.set(source, schemaKey, transFun(schema, source, route));
