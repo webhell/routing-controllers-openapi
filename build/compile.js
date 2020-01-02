@@ -55,11 +55,11 @@ function getSchemaByType(type, param) {
             schema = { type: 'boolean' };
         }
         else if (type.name === 'Array') {
-            console.warn(`type Array not support`);
+            loggerNotSupport(`type Array not support`, param);
             schema = { type: 'array' };
         }
         else if (type.name === 'Object') {
-            console.warn(`type Object not support`);
+            loggerNotSupport(`type Object not support`, param);
             schema = { type: 'object' };
         }
         else {
@@ -76,12 +76,22 @@ function getSchemaByType(type, param) {
         }
     }
     else {
-        console.warn(`type Any not support`);
+        loggerNotSupport(`type Any not support`, param);
         schema = { type: 'any' };
     }
     return schema;
 }
 exports.getSchemaByType = getSchemaByType;
+function loggerNotSupport(msg, params) {
+    const { index, method, object, type } = params || {};
+    console.info({
+        msg,
+        index,
+        type,
+        method,
+        controller: object.constructor.name
+    });
+}
 /**获取ts运行时类型数据 */
 function getGenerator(compilerOptions) {
     const { pattern = 'src/controller/**/*.ts', tsCompilerOptions = {} } = compilerOptions;
@@ -98,9 +108,9 @@ function generatorToSchemasByStorage(generator, storage, compilerOptions) {
         return schemas;
     const { refPointerPrefix = '#/components/schemas/' } = compilerOptions;
     storage.params.forEach((param) => {
-        const { explicitType, index, object, method } = param;
+        const { index, object, method } = param;
         const type = Reflect.getMetadata(decorators_1.DESIGN_PARAM_TYPES, object, method)[index];
-        const schema = getSchemaByType(type, explicitType);
+        const schema = getSchemaByType(type, param);
         const $ref = schema.items ? schema.items.$ref : schema.$ref;
         if ($ref && _.isString($ref)) {
             const schemaName = _.last(_.split($ref, '/'));

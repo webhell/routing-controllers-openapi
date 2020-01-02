@@ -92,10 +92,10 @@ export function getSchemaByType(type: any, param?: ParamMetadataArgs): SchemaObj
         } else if (_.isBoolean(type.prototype)) {
             schema = { type: 'boolean' }
         } else if (type.name === 'Array') {
-            console.warn(`type Array not support`);
+            loggerNotSupport(`type Array not support`, param);
             schema = { type: 'array' }
         } else if (type.name === 'Object') {
-            console.warn(`type Object not support`);
+            loggerNotSupport(`type Object not support`, param);
             schema = { type: 'object' }
         } else {
             schema = { $ref: refPointerPrefix + type.name }
@@ -108,10 +108,21 @@ export function getSchemaByType(type: any, param?: ParamMetadataArgs): SchemaObj
             schema = { $ref: refPointerPrefix + type }
         }
     } else {
-        console.warn(`type Any not support`);
+        loggerNotSupport(`type Any not support`, param);
         schema = { type: 'any' }
     }
     return schema;
+}
+
+function loggerNotSupport(msg: string, params?: ParamMetadataArgs) {
+    const { index, method, object, type } = params || {};
+    console.info({
+        msg,
+        index,
+        type,
+        method,
+        controller: object.constructor.name
+    });
 }
 
 /**获取ts运行时类型数据 */
@@ -132,9 +143,9 @@ export function generatorToSchemasByStorage(generator: JsonSchemaGenerator | nul
     if (!generator) return schemas;
     const { refPointerPrefix = '#/components/schemas/' } = compilerOptions;
     storage.params.forEach((param: ParamMetadataArgs) => {
-        const { explicitType, index, object, method } = param;
+        const { index, object, method } = param;
         const type = Reflect.getMetadata(DESIGN_PARAM_TYPES, object, method)[index];
-        const schema = getSchemaByType(type, explicitType) as SchemaObject;
+        const schema = getSchemaByType(type, param) as SchemaObject;
         const $ref = schema.items ? schema.items.$ref : schema.$ref;
         if ($ref && _.isString($ref)) {
             const schemaName = _.last(_.split($ref, '/')) as string;
