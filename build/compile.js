@@ -69,7 +69,7 @@ function getSchemaByType(type, param) {
     else if (_.isString(type) && type) {
         const JsType = ['string', 'number', 'boolean', 'null', 'any'];
         if (JsType.indexOf(type) > -1) {
-            schema = { type: JsType };
+            schema = { type };
         }
         else {
             schema = { $ref: refPointerPrefix + type };
