@@ -142,8 +142,10 @@ export function generatorToSchemasByStorage(generator: JsonSchemaGenerator | nul
     const schemas: ISchemas = {};
     if (!generator) return schemas;
     const { refPointerPrefix = '#/components/schemas/' } = compilerOptions;
+    const supportParams = ['query', 'queries', 'header', 'headers', 'body', 'body-param', 'param'];
     storage.params.forEach((param: ParamMetadataArgs) => {
-        const { index, object, method } = param;
+        const { index, object, method, type: paramType } = param;
+        if (supportParams.indexOf(paramType) === -1) return;
         const type = Reflect.getMetadata(DESIGN_PARAM_TYPES, object, method)[index];
         const schema = getSchemaByType(type, param) as SchemaObject;
         const $ref = schema.items ? schema.items.$ref : schema.$ref;

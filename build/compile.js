@@ -107,8 +107,11 @@ function generatorToSchemasByStorage(generator, storage, compilerOptions) {
     if (!generator)
         return schemas;
     const { refPointerPrefix = '#/components/schemas/' } = compilerOptions;
+    const supportParams = ['query', 'queries', 'header', 'headers', 'body', 'body-param', 'param'];
     storage.params.forEach((param) => {
-        const { index, object, method } = param;
+        const { index, object, method, type: paramType } = param;
+        if (supportParams.indexOf(paramType) === -1)
+            return;
         const type = Reflect.getMetadata(decorators_1.DESIGN_PARAM_TYPES, object, method)[index];
         const schema = getSchemaByType(type, param);
         const $ref = schema.items ? schema.items.$ref : schema.$ref;
