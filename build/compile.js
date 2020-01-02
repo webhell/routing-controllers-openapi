@@ -181,3 +181,42 @@ function transParameters(spec, generator) {
     return spec;
 }
 exports.transParameters = transParameters;
+/**
+ *
+ */
+function transResponse(spec, compilerOptions) {
+    Object.keys(spec.paths).forEach(path => {
+        Object.keys(spec.paths[path]).forEach(method => {
+            const operation = spec.paths[path][method];
+            const { responses } = operation;
+            if (!responses)
+                return;
+            Object.keys(responses).forEach(status => {
+                Object.keys(responses[status]['content']).forEach(contentType => {
+                    let content = responses[status]['content'][contentType];
+                    content = {
+                        type: 'object',
+                        properties: {
+                            retCode: {
+                                type: 'number',
+                                description: '0正常返回'
+                            },
+                            retMsg: {
+                                type: 'string',
+                                description: '错误消息'
+                            },
+                            data: Object.assign({}, content)
+                        },
+                        required: [
+                            'retCode',
+                            'retMsg',
+                            'data'
+                        ]
+                    };
+                });
+            });
+        });
+    });
+    return spec;
+}
+exports.transResponse = transResponse;

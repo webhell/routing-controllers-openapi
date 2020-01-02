@@ -1,8 +1,7 @@
 import * as _ from 'lodash';
 import 'reflect-metadata';
-import { OperationObject, ReferenceObject, ResponsesObject, SchemaObject } from 'openapi3-ts';
+import { OperationObject } from 'openapi3-ts';
 import { IRoute } from './compile';
-import { getContentType, getStatusCode } from './generate';
 
 const OPEN_API_KEY = Symbol('routing-controllers-openapi:OpenAPI');
 export const DESIGN_PARAM_TYPES = 'design:paramtypes';
@@ -107,56 +106,4 @@ function setOpenAPIMetadata(value: OpenAPIParam[], target: object, key?: string)
     return key
         ? Reflect.defineMetadata(OPEN_API_KEY, value, target.constructor, key)
         : Reflect.defineMetadata(OPEN_API_KEY, value, target);
-}
-
-/**
- * Supplement action with response body type annotation.
- */
-export function ResponseSchema(
-    responseClass: Function | string, // tslint:disable-line
-    options: {
-        contentType?: string
-        description?: string
-        statusCode?: string | number
-        isArray?: boolean
-    } = {}
-) {
-    const setResponseSchema = (source: OperationObject, route: IRoute) => {
-        const contentType = options.contentType || getContentType(route)
-        const description = options.description || ''
-        const isArray = options.isArray || false
-        const statusCode = (options.statusCode || getStatusCode(route)) + ''
-
-        let responseSchemaName = ''
-        if (typeof responseClass === 'function' && responseClass.name) {
-            responseSchemaName = responseClass.name
-        } else if (typeof responseClass === 'string') {
-            responseSchemaName = responseClass
-        }
-
-        if (responseSchemaName) {
-            const reference: ReferenceObject = {
-                $ref: `#/components/schemas/${responseSchemaName}`
-            }
-            const schema: SchemaObject = isArray
-                ? { items: reference, type: 'array' }
-                : reference
-            const responses: ResponsesObject = {
-                [statusCode]: {
-                    content: {
-                        [contentType]: {
-                            schema
-                        }
-                    },
-                    description
-                }
-            }
-
-            return _.merge({}, source, { responses })
-        }
-
-        return source
-    }
-
-    return OpenAPI(setResponseSchema)
 }

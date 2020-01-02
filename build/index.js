@@ -16,7 +16,8 @@ function routingControllersToSpec(storage = routing_controllers_1.getMetadataArg
     const schemas = compile_1.generatorToSchemasByStorage(generator, storage, compilerOptions);
     const routes = compile_1.parseRoutes(storage, routingControllerOptions);
     const spec = generate_1.getSpec(routes);
-    const transSpec = compile_1.transParameters(spec, generator);
+    let transSpec = compile_1.transParameters(spec, generator);
+    transSpec = compile_1.transResponse(spec, compilerOptions);
     return _.merge(transSpec, { components: { schemas } }, additionalProperties);
 }
 exports.routingControllersToSpec = routingControllersToSpec;

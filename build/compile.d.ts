@@ -47,4 +47,8 @@ export declare function generatorToSchemasByStorage(generator: JsonSchemaGenerat
  * 展开下parameters schema参数
  */
 export declare function transParameters(spec: OpenAPIObject, generator: JsonSchemaGenerator | null): OpenAPIObject;
+/**
+ *
+ */
+export declare function transResponse(spec: OpenAPIObject, compilerOptions: ICompilerOptions): OpenAPIObject;
 export {};

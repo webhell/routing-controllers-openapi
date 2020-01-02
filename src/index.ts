@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import "reflect-metadata";
 import { OpenAPIObject } from 'openapi3-ts';
 import { MetadataArgsStorage, getMetadataArgsStorage, RoutingControllersOptions } from "routing-controllers";
-import { ICompilerOptions, getGenerator, generatorToSchemasByStorage, parseRoutes, transParameters } from "./compile";
+import { ICompilerOptions, getGenerator, generatorToSchemasByStorage, parseRoutes, transParameters, transResponse } from "./compile";
 import { getSpec } from './generate';
 export * from './decorators';
 export * from './compile';
@@ -18,6 +18,7 @@ export function routingControllersToSpec(
     const schemas = generatorToSchemasByStorage(generator, storage, compilerOptions);
     const routes = parseRoutes(storage, routingControllerOptions)
     const spec = getSpec(routes);
-    const transSpec = transParameters(spec, generator);
+    let transSpec = transParameters(spec, generator);
+    transSpec = transResponse(spec, compilerOptions);
     return _.merge(transSpec, { components: { schemas } }, additionalProperties)
 }

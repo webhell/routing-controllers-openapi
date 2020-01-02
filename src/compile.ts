@@ -213,3 +213,41 @@ export function transParameters(spec: OpenAPIObject, generator: JsonSchemaGenera
     });
     return spec;
 }
+
+/**
+ * 
+ */
+export function transResponse(spec: OpenAPIObject, compilerOptions: ICompilerOptions): OpenAPIObject {
+    Object.keys(spec.paths).forEach(path => {
+        Object.keys(spec.paths[path]).forEach(method => {
+            const operation = spec.paths[path][method] as OperationObject;
+            const { responses } = operation;
+            if (!responses) return;
+            Object.keys(responses).forEach(status => {
+                Object.keys(responses[status]['content']).forEach(contentType => {
+                    let content: SchemaObject = responses[status]['content'][contentType];
+                    content = {
+                        type: 'object',
+                        properties: {
+                            retCode: {
+                                type: 'number',
+                                description: '0正常返回'
+                            },
+                            retMsg: {
+                                type: 'string',
+                                description: '错误消息'
+                            },
+                            data: { ...content }
+                        },
+                        required: [
+                            'retCode',
+                            'retMsg',
+                            'data'
+                        ]
+                    };
+                });
+            });
+        });
+    });
+    return spec;
+}

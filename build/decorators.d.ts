@@ -24,14 +24,4 @@ export declare function OpenAPI(spec: IOperationObject | OpenAPIParam): (...args
  * Apply the keywords defined in @OpenAPI decorator to its target route.
  */
 export declare function applyOpenAPIDecorator(originalOperation: OperationObject, route: IRoute): OperationObject;
-/**
- * Supplement action with response body type annotation.
- */
-export declare function ResponseSchema(responseClass: Function | string, // tslint:disable-line
-options?: {
-    contentType?: string;
-    description?: string;
-    statusCode?: string | number;
-    isArray?: boolean;
-}): (...args: [Function] | [object, string, PropertyDescriptor]) => void;
 export {};

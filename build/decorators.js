@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
 require("reflect-metadata");
-const generate_1 = require("./generate");
 const OPEN_API_KEY = Symbol('routing-controllers-openapi:OpenAPI');
 exports.DESIGN_PARAM_TYPES = 'design:paramtypes';
 exports.DESIGN_RETURN_TYPE = 'design:returntype';
@@ -95,44 +94,3 @@ function setOpenAPIMetadata(value, target, key) {
         ? Reflect.defineMetadata(OPEN_API_KEY, value, target.constructor, key)
         : Reflect.defineMetadata(OPEN_API_KEY, value, target);
 }
-/**
- * Supplement action with response body type annotation.
- */
-function ResponseSchema(responseClass, // tslint:disable-line
-options = {}) {
-    const setResponseSchema = (source, route) => {
-        const contentType = options.contentType || generate_1.getContentType(route);
-        const description = options.description || '';
-        const isArray = options.isArray || false;
-        const statusCode = (options.statusCode || generate_1.getStatusCode(route)) + '';
-        let responseSchemaName = '';
-        if (typeof responseClass === 'function' && responseClass.name) {
-            responseSchemaName = responseClass.name;
-        }
-        else if (typeof responseClass === 'string') {
-            responseSchemaName = responseClass;
-        }
-        if (responseSchemaName) {
-            const reference = {
-                $ref: `#/components/schemas/${responseSchemaName}`
-            };
-            const schema = isArray
-                ? { items: reference, type: 'array' }
-                : reference;
-            const responses = {
-                [statusCode]: {
-                    content: {
-                        [contentType]: {
-                            schema
-                        }
-                    },
-                    description
-                }
-            };
-            return _.merge({}, source, { responses });
-        }
-        return source;
-    };
-    return OpenAPI(setResponseSchema);
-}
-exports.ResponseSchema = ResponseSchema;
